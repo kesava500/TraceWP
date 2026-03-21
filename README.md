@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/assets/tracewp-repo-banner.svg" alt="TraceWP banner" width="100%">
+</p>
+
 # TraceWP
 
 **Give AI the context it needs to actually help with your WordPress site.**
