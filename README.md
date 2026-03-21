@@ -150,6 +150,33 @@ tracewp/
     └── settings.php                   Settings page
 ```
 
+## Changelog
+
+### 1.0.0
+
+First stable public release.
+
+- Context export with 15+ data points
+- Markdown output with table of contents
+- Front-end element inspector
+- AI investigator with 7 read-only tools
+- OpenRouter integration with free tier support
+- API keys encrypted with AES-256-CBC (OpenSSL required)
+- AI output HTML-escaped before rendering
+- File access jailed to ABSPATH
+
+### 0.9.0
+
+Pre-release. AI investigator, front-end inspector with embedded chat, OpenRouter integration.
+
+### 0.5.0
+
+Pre-release. Context export with site, page, and element scope. Front-end element inspector.
+
+### 0.1.0
+
+Initial development. Basic site context export with plugin and theme detection.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding standards, and PR guidelines.
