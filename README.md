@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/banner.svg" alt="TraceWP" width="100%">
+  <img src=".github/banner.jpg" alt="TraceWP" width="100%">
 </p>
 
 <p align="center">
