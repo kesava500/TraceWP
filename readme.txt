@@ -1,5 +1,5 @@
 === TraceWP ===
-Contributors: bellettydigital
+Contributors: kesava500
 Tags: ai, context, debugging, development, inspector
 Requires at least: 6.4
 Tested up to: 6.8
