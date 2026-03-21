@@ -27,10 +27,6 @@ When you ask AI for help with your WordPress site, it doesn't know anything abou
 
 TraceWP eliminates that. One click gives the AI everything.
 
-<p align="center">
-  <img src=".github/how-it-works.svg" alt="How TraceWP works" width="100%">
-</p>
-
 ## Features
 
 ### Context export — no API key needed
