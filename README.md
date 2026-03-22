@@ -153,6 +153,23 @@ tracewp/
     └── settings.php                   Settings page
 ```
 
+## Changelog
+
+### 1.1.1
+
+- Bug fixes
+
+### 1.0.1
+
+- Design updates and bug fixes
+
+### 1.0.0
+
+- First stable public release
+- Context export with 15+ data points and markdown output
+- Front-end element inspector, AI investigator, and OpenRouter integration
+- API keys encrypted with AES-256-CBC and AI output HTML-escaped
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding standards, and PR guidelines.
