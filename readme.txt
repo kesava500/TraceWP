@@ -4,7 +4,7 @@ Tags: ai, context, debugging, development, inspector
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,6 +76,10 @@ Your key is encrypted with AES-256-CBC using your WordPress AUTH_KEY. It's fetch
 Any model on OpenRouter. The plugin fetches the live model list with pricing. Free models are enabled by default.
 
 == Changelog ==
+
+= 1.1.1 =
+
+* Bug fixes
 
 = 1.0.1 =
 

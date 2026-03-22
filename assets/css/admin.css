@@ -265,24 +265,24 @@
 	gap: 6px;
 	padding: 6px 12px !important;
 	font-size: 13px !important;
-	border: 1px solid transparent !important;
+	border: 1px solid var(--pt-border) !important;
 	border-radius: var(--pt-radius) !important;
-	background: transparent !important;
-	color: var(--pt-text-secondary) !important;
+	background: var(--pt-surface) !important;
+	color: var(--pt-text) !important;
 	cursor: pointer;
-	transition: background 0.15s;
+	transition: all 0.15s;
 }
 
 .pt-btn-ghost-sm:hover {
 	background: var(--pt-muted) !important;
-	color: var(--pt-text) !important;
 }
 
 /* ─── Export Output ──────────────────────────────────── */
 
 .pt-output-panel {
 	margin-top: 20px;
-	padding-top: 50%;
+	padding-top: 20px;
+	border-top: 1px solid var(--pt-border);
 }
 
 .pt-output-header {
@@ -585,9 +585,19 @@
 	transition: color 0.15s;
 	display: inline-flex;
 	align-items: center;
+	padding: 4px;
+	border-radius: 4px;
 }
 
-.pt-chat-attach:hover { color: var(--pt-text); }
+.pt-chat-attach svg {
+	width: 14px;
+	height: 14px;
+}
+
+.pt-chat-attach:hover {
+	color: var(--pt-text);
+	background: var(--pt-muted);
+}
 
 /* Send button in footer row */
 .pt-chat-send-btn {
