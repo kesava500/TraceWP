@@ -1,10 +1,10 @@
 === TraceWP ===
-Contributors: kesava500
+Contributors: bellettydigital
 Tags: ai, context, debugging, development, inspector
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,6 +76,14 @@ Your key is encrypted with AES-256-CBC using your WordPress AUTH_KEY. It's fetch
 Any model on OpenRouter. The plugin fetches the live model list with pricing. Free models are enabled by default.
 
 == Changelog ==
+
+= 1.0.1 =
+
+* Updated admin panel design — consistent color tokens, proper input borders and backgrounds, tighter radius matching WordPress native UI
+* Fixed "Free tier" badge now displays as a visible pill with background and border
+* Improved model selector UX — selecting a paid model automatically unchecks "Use free models only", and checking free-only resets the model dropdown
+* Fixed broken CSS variable references from design system migration
+* Front-end inspector widget refined to match v0 design spec
 
 = 1.0.0 =
 

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/banner.jpg" alt="TraceWP" width="100%">
+  <img src=".github/banner.svg" alt="TraceWP" width="100%">
 </p>
 
 <p align="center">
@@ -27,6 +27,10 @@ When you ask AI for help with your WordPress site, it doesn't know anything abou
 
 TraceWP eliminates that. One click gives the AI everything.
 
+<p align="center">
+  <img src=".github/how-it-works.svg" alt="How TraceWP works" width="100%">
+</p>
+
 ## Features
 
 ### Context export — no API key needed
@@ -47,19 +51,22 @@ TraceWP eliminates that. One click gives the AI everything.
 
 ## Screenshots
 
-<p align="center">
-  <img src=".github/screenshot-admin.png" alt="TraceWP admin dashboard" width="80%">
-</p>
-<p align="center"><em>Admin dashboard — AI Investigator, Front-End Inspector, and Context Export</em></p>
-
-<p align="center">
-  <img src=".github/screenshot-export.png" alt="Export output" width="80%">
-</p>
-<p align="center"><em>Export output — server environment, wp-config, theme data and more, ready to paste</em></p>
-
-| | |
-|---|---|
-| <img src=".github/screenshot-inspector.png" alt="Front-end inspector" width="100%"><br><em>Front-end inspector — click to capture any element</em> | <img src=".github/screenshot-settings.png" alt="Settings" width="100%"><br><em>Settings — API key encryption, model selection, free tier</em> |
+<table>
+<tr>
+<td width="33%" align="center">
+<img src=".github/screenshot-dashboard.png" alt="Dashboard" width="100%"><br>
+<em>Inspector, Export, and AI — all from one page</em>
+</td>
+<td width="33%" align="center">
+<img src=".github/screenshot-ai-chat.png" alt="AI Investigator" width="100%"><br>
+<em>AI reads your site files and suggests fixes</em>
+</td>
+<td width="33%" align="center">
+<img src=".github/screenshot-inspector.png" alt="Front-end Inspector" width="100%"><br>
+<em>Click any element to capture it instantly</em>
+</td>
+</tr>
+</table>
 
 ## What's in the export
 
@@ -149,33 +156,6 @@ tracewp/
     ├── partials-output.php            Export output panel
     └── settings.php                   Settings page
 ```
-
-## Changelog
-
-### 1.0.0
-
-First stable public release.
-
-- Context export with 15+ data points
-- Markdown output with table of contents
-- Front-end element inspector
-- AI investigator with 7 read-only tools
-- OpenRouter integration with free tier support
-- API keys encrypted with AES-256-CBC (OpenSSL required)
-- AI output HTML-escaped before rendering
-- File access jailed to ABSPATH
-
-### 0.9.0
-
-Pre-release. AI investigator, front-end inspector with embedded chat, OpenRouter integration.
-
-### 0.5.0
-
-Pre-release. Context export with site, page, and element scope. Front-end element inspector.
-
-### 0.1.0
-
-Initial development. Basic site context export with plugin and theme detection.
 
 ## Contributing
 

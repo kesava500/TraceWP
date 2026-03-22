@@ -134,22 +134,25 @@
 			'</div>';
 
 		container.innerHTML =
-			'<div class="pt-chat-notice">I can read your site\u2019s files and settings to help diagnose issues. I can\u2019t make changes directly \u2014 I\u2019ll tell you exactly where and how to fix things.</div>' +
-			'<div class="pt-chat-messages" style="max-height:' + maxH + ';">' + starters + '</div>' +
+			'<div class="pt-chat-messages" style="max-height:' + maxH + ';">' +
+			'  <div class="pt-chat-msg pt-chat-msg--assistant"><div class="pt-chat-msg-avatar">AI</div><div class="pt-chat-msg-body">I can read your site\u2019s files and settings to help diagnose issues. I can\u2019t make changes directly \u2014 I\u2019ll tell you exactly where and how to fix things.</div></div>' +
+			starters +
+			'</div>' +
 			'<div class="pt-chat-input-area">' +
 			'  <div class="pt-chat-images" style="display:none;"></div>' +
 			'  <div class="pt-chat-input-row">' +
 			'    <textarea rows="' + rows + '" placeholder="Describe the issue\u2026"></textarea>' +
-			'    <button type="button" class="pt-chat-send-btn">Send</button>' +
 			'  </div>' +
 			'  <div class="pt-chat-footer">' +
-			'    <label class="pt-chat-attach" title="Attach screenshot">' +
-			'      <input type="file" accept="image/*" style="display:none;">' +
-			'      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>' +
-			'    </label>' +
-			'    <span class="pt-chat-tokens"></span>' +
-			'    <button type="button" class="pt-chat-new" title="New conversation">\u21BB New</button>' +
-			'    <button type="button" class="pt-chat-download" title="Download conversation">Export</button>' +
+			'    <div class="pt-chat-footer-left">' +
+			'      <label class="pt-chat-attach" title="Attach screenshot">' +
+			'        <input type="file" accept="image/*" style="display:none;">' +
+			'        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>' +
+			'      </label>' +
+			'      <button type="button" class="pt-chat-new" title="New conversation"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg> New</button>' +
+			'      <button type="button" class="pt-chat-download" title="Download conversation">Export</button>' +
+			'    </div>' +
+			'    <button type="button" class="pt-chat-send-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send</button>' +
 			'  </div>' +
 			'</div>';
 
@@ -206,10 +209,13 @@
 			var div = document.createElement('div');
 			div.className = 'pt-chat-msg pt-chat-msg--' + role;
 
-			var label = document.createElement('div');
-			label.className = 'pt-chat-msg-label';
-			label.textContent = role === 'user' ? 'You' : 'AI';
-			div.appendChild(label);
+			// Avatar circle.
+			if (role === 'assistant') {
+				var avatar = document.createElement('div');
+				avatar.className = 'pt-chat-msg-avatar';
+				avatar.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 00-3 3v4a3 3 0 006 0V5a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
+				div.appendChild(avatar);
+			}
 
 			var body = document.createElement('div');
 			body.className = 'pt-chat-msg-body';
@@ -228,6 +234,15 @@
 			text.innerHTML = fmtMd(content);
 			body.appendChild(text);
 			div.appendChild(body);
+
+			// User avatar after body.
+			if (role === 'user') {
+				var uAvatar = document.createElement('div');
+				uAvatar.className = 'pt-chat-msg-avatar';
+				uAvatar.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+				div.appendChild(uAvatar);
+			}
+
 			els.messages.appendChild(div);
 			els.messages.scrollTop = els.messages.scrollHeight;
 			return text;
@@ -401,6 +416,11 @@
 			els.sendBtn.disabled = true;
 			els.sendBtn.textContent = '\u2026';
 
+			// Warn if attaching images with free-only model (likely no vision support).
+			if (state.pendingImages.length && config.freeOnly) {
+				addMessage('assistant', 'Note: Free models may not support image analysis. If you get an error, try switching to a vision-capable model in TraceWP Settings.');
+			}
+
 			var content = [];
 			var imgSrcs = [];
 			state.pendingImages.forEach(function (img) {
@@ -448,7 +468,16 @@
 					if (!response.ok) {
 						var err = await response.json().catch(function () { return {}; });
 						if (response.status === 429) { addMessage('assistant', 'Rate limited, retrying\u2026'); await sleep(3000); continue; }
-						addMessage('assistant', 'Error: ' + (err.error ? err.error.message : 'HTTP ' + response.status));
+						var errMsg = err.error ? err.error.message : 'HTTP ' + response.status;
+						// Detect common OpenRouter errors and provide helpful guidance.
+						if (errMsg.indexOf('No endpoints') !== -1 || errMsg.indexOf('provider routing') !== -1) {
+							if (state.pendingImages.length || (state.history.length && JSON.stringify(state.history).indexOf('image_url') !== -1)) {
+								errMsg = 'The selected model doesn\u2019t support images with tool use. Try removing the image, or switch to a vision-capable model (e.g. Claude Sonnet or GPT-4o) in TraceWP Settings.';
+							} else {
+								errMsg = 'The selected model doesn\u2019t support tool use. Try a different model in TraceWP Settings (Claude, GPT-4, or Gemini models work well).';
+							}
+						}
+						addMessage('assistant', errMsg);
 						state.history.push({ role: 'assistant', content: 'Error' });
 						return;
 					}
@@ -573,7 +602,8 @@
 			});
 		}
 
-		els.downloadBtn.addEventListener('click', function () {
+		els.downloadBtn.addEventListener('click', function (e) {
+			e.stopPropagation();
 			if (!state.history.length) return;
 			var md = '# TraceWP Investigation\nDate: ' + new Date().toISOString().slice(0, 10) + '\n\n---\n\n';
 			state.history.forEach(function (m) {
@@ -590,9 +620,13 @@
 			var blob = new Blob([md], { type: 'text/markdown' });
 			var url = URL.createObjectURL(blob);
 			var a = document.createElement('a');
-			a.href = url; a.download = 'tracewp-investigation-' + new Date().toISOString().slice(0, 10) + '.md';
-			document.body.appendChild(a); a.click(); document.body.removeChild(a);
-			URL.revokeObjectURL(url);
+			a.href = url;
+			a.download = 'tracewp-investigation-' + new Date().toISOString().slice(0, 10) + '.md';
+			a.style.display = 'none';
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
 		});
 
 		// ── Public interface ────────────────────────

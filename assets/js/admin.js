@@ -108,6 +108,9 @@
 		}
 	}
 
+	var copyIconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+	var checkIconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
 	async function copyOutput(event) {
 		var output = document.querySelector('.pt-output');
 		if (!output || !output.value) return;
@@ -117,7 +120,6 @@
 			await navigator.clipboard.writeText(output.value);
 			success = true;
 		} catch (e) {
-			// Fallback: hidden textarea copy.
 			try {
 				var temp = document.createElement('textarea');
 				temp.value = output.value;
@@ -132,19 +134,16 @@
 		}
 
 		var btn = event.currentTarget;
-		var original = btn.textContent;
+		var originalHtml = btn.innerHTML;
 		if (success) {
-			btn.textContent = '\u2713 Copied!';
-			btn.style.color = '#059669';
-			btn.style.borderColor = '#059669';
+			btn.innerHTML = checkIconSvg + ' Copied';
+			btn.classList.add('pt-btn-copied');
 		} else {
-			btn.textContent = 'Failed';
-			btn.style.color = '#dc2626';
+			btn.innerHTML = 'Failed';
 		}
 		window.setTimeout(function () {
-			btn.textContent = original;
-			btn.style.color = '';
-			btn.style.borderColor = '';
+			btn.innerHTML = originalHtml;
+			btn.classList.remove('pt-btn-copied');
 		}, 2000);
 	}
 
@@ -424,6 +423,12 @@
 				if (sel) {
 					infoEl.textContent = 'Context: ' + (sel.context_length || 'unknown').toLocaleString() + ' tokens' + (sel.supports_vision ? ' | Vision supported' : '');
 					infoEl.style.display = 'block';
+
+					// If user selects a specific non-free model, uncheck free-only.
+					var freeOnlyCb = document.getElementById('pt-free-only');
+					if (freeOnlyCb && freeOnlyCb.checked && sel.pricing && sel.pricing.prompt > 0) {
+						freeOnlyCb.checked = false;
+					}
 				} else {
 					infoEl.style.display = 'none';
 				}
@@ -438,6 +443,19 @@
 	if (refreshBtn) {
 		refreshBtn.addEventListener('click', function () {
 			loadModels();
+		});
+	}
+
+	// When free-only is checked, reset model selection to auto.
+	var freeOnlyCheckbox = document.getElementById('pt-free-only');
+	if (freeOnlyCheckbox) {
+		freeOnlyCheckbox.addEventListener('change', function () {
+			if (this.checked) {
+				var modelSelect = document.getElementById('pt-model-select');
+				if (modelSelect) modelSelect.value = '';
+				var infoEl = document.getElementById('pt-model-info');
+				if (infoEl) infoEl.style.display = 'none';
+			}
 		});
 	}
 

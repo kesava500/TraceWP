@@ -11,39 +11,59 @@
 	// Hover overlay.
 	var overlay = document.createElement('div');
 	overlay.id = 'pt-inspector-overlay';
+	overlay.className = 'pt-highlight-overlay';
 	document.body.appendChild(overlay);
 
 	// Panel.
 	var panel = document.createElement('div');
 	panel.id = 'pt-inspector-panel';
+	panel.className = 'pt-inspector-panel';
 
 	var hasAI = ptInspector.hasApiKey && window.TracewpChat;
 
 	panel.innerHTML =
 		'<div class="pt-panel-header">' +
-		'  <strong>TraceWP</strong>' +
-		'  <div class="pt-panel-tabs">' +
-		'    <button type="button" class="pt-panel-tab pt-panel-tab--active" data-tab="inspect">Inspect</button>' +
-		(hasAI ? '    <button type="button" class="pt-panel-tab" data-tab="ai" id="pt-ai-tab">Ask AI</button>' : '') +
+		'  <div class="pt-panel-header-left">' +
+		'    <strong>TraceWP</strong>' +
+		'    <div class="pt-panel-tabs">' +
+		'      <button type="button" class="pt-panel-tab pt-panel-tab--active" data-tab="inspect">' +
+		'        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>' +
+		'        Inspect' +
+		'      </button>' +
+		(hasAI ?
+		'      <button type="button" class="pt-panel-tab" data-tab="ai" id="pt-ai-tab">' +
+		'        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>' +
+		'        Ask AI' +
+		'      </button>' : '') +
+		'    </div>' +
 		'  </div>' +
 		'  <button class="pt-panel-close" id="pt-close" title="Close">\u00d7</button>' +
 		'</div>' +
 		'<div class="pt-panel-body">' +
-		// Inspect tab.
 		'  <div class="pt-tab-content pt-tab-content--active" data-tab="inspect">' +
-		'    <span class="pt-panel-hint">Click any element to capture it.</span>' +
-		'    <span class="pt-selected-label">Selected element</span>' +
-		'    <pre id="pt-selection-preview">None</pre>' +
+		'    <span class="pt-panel-hint">Click any element on the page to capture it.</span>' +
+		'    <span class="pt-selected-label">Selected Element</span>' +
+		'    <pre id="pt-selection-preview">No element selected</pre>' +
 		'    <span class="pt-selected-label">Output</span>' +
 		'    <textarea id="pt-output" rows="4" readonly placeholder="Click an element\u2026"></textarea>' +
 		'    <div id="pt-token-info" class="pt-token-info" style="display:none;"></div>' +
 		'    <div class="pt-btn-row">' +
-		'      <button type="button" id="pt-copy">Copy</button>' +
-		'      <button type="button" id="pt-download-inspector">Download</button>' +
-		(hasAI ? '      <button type="button" id="pt-ask-ai-btn" class="pt-btn-primary" style="display:none;">Ask AI about this \u2192</button>' : '') +
+		'      <button type="button" id="pt-copy">' +
+		'        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>' +
+		'        Copy' +
+		'      </button>' +
+		'      <button type="button" id="pt-download-inspector">' +
+		'        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>' +
+		'        Download' +
+		'      </button>' +
+		(hasAI ?
+		'      <button type="button" id="pt-ask-ai-btn" class="pt-btn-primary" style="display:none;">' +
+		'        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>' +
+		'        Ask AI' +
+		'        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;margin-left:2px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>' +
+		'      </button>' : '') +
 		'    </div>' +
 		'  </div>' +
-		// AI Chat tab.
 		(hasAI ?
 		'  <div class="pt-tab-content" data-tab="ai">' +
 		'    <div id="pt-inspector-chat"></div>' +
@@ -120,8 +140,8 @@
 	function moveOverlay(el) {
 		var r = el.getBoundingClientRect();
 		overlay.style.display = 'block';
-		overlay.style.top = (r.top + window.scrollY) + 'px';
-		overlay.style.left = (r.left + window.scrollX) + 'px';
+		overlay.style.top = r.top + 'px';
+		overlay.style.left = r.left + 'px';
 		overlay.style.width = r.width + 'px';
 		overlay.style.height = r.height + 'px';
 	}
@@ -161,6 +181,8 @@
 		if (panel.contains(target)) return true;
 		if (target.closest('.pt-consent-overlay')) return true;
 		if (target.closest('#wpadminbar')) return true;
+		// Don't intercept programmatic download clicks.
+		if (target.hasAttribute && target.hasAttribute('download')) return true;
 		return false;
 	}
 
@@ -199,14 +221,19 @@
 		} catch (e) { output.select(); }
 	});
 
-	panel.querySelector('#pt-download-inspector').addEventListener('click', function () {
+	panel.querySelector('#pt-download-inspector').addEventListener('click', function (e) {
+		e.stopPropagation();
 		var output = panel.querySelector('#pt-output');
 		if (!output.value) return;
 		var blob = new Blob([output.value], { type: 'text/plain' });
 		var url = URL.createObjectURL(blob);
 		var a = document.createElement('a');
-		a.href = url; a.download = 'tracewp-element-' + new Date().toISOString().slice(0, 10) + '.txt';
-		document.body.appendChild(a); a.click(); document.body.removeChild(a);
+		a.href = url;
+		a.download = 'tracewp-element-' + new Date().toISOString().slice(0, 10) + '.txt';
+		a.style.display = 'none';
+		panel.appendChild(a);
+		a.click();
+		panel.removeChild(a);
 		URL.revokeObjectURL(url);
 	});
 
@@ -214,12 +241,13 @@
 	function prefillAiWithElement() {
 		if (!lastCaptured || !inspectorChat) return;
 		var el = lastCaptured;
-		var msg = 'I selected this element on ' + pageUrl.toString() + ':\n' +
-			'Selector: ' + (el.selector || 'unknown') + '\n' +
-			'Tag: ' + el.tag + (el.id ? '#' + el.id : '') +
-			(el.classes.length ? '.' + el.classes.slice(0, 4).join('.') : '') + '\n' +
-			(el.text_preview ? 'Text: "' + el.text_preview.slice(0, 100) + '"' : '') + '\n\nIssue: ';
-		inspectorChat.prefill(msg);
+		var parts = ['I selected this element:'];
+		parts.push('Selector: ' + (el.selector || 'unknown'));
+		parts.push('Tag: ' + el.tag + (el.id ? '#' + el.id : '') +
+			(el.classes.length ? '.' + el.classes.slice(0, 4).join('.') : ''));
+		if (el.text_preview) parts.push('Text: "' + el.text_preview.slice(0, 80) + '"');
+		parts.push('Issue: ');
+		inspectorChat.prefill(parts.join('\n'));
 	}
 
 	var aiTab = panel.querySelector('#pt-ai-tab');
