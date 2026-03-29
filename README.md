@@ -159,7 +159,7 @@ tracewp/
 
 - Bug fixes
 
-### 1.0.1
+### 1.1.0
 
 - Design updates and bug fixes
 

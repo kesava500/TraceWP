@@ -81,7 +81,7 @@ Any model on OpenRouter. The plugin fetches the live model list with pricing. Fr
 
 * Bug fixes
 
-= 1.0.1 =
+= 1.1.0 =
 
 * Updated admin panel design — consistent color tokens, proper input borders and backgrounds, tighter radius matching WordPress native UI
 * Fixed "Free tier" badge now displays as a visible pill with background and border
