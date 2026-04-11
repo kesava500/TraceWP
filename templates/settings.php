@@ -31,12 +31,9 @@ $masked_key = PT_Settings::instance()->get_masked_key();
 
 	<section class="pt-card" id="pt-ai-settings">
 		<h2><?php esc_html_e( 'AI Investigator', 'tracewp' ); ?></h2>
-		<p class="description"><?php esc_html_e( 'Connect an OpenRouter API key to enable the AI investigator. The AI can read your site files (read-only) and help diagnose issues. Your key is encrypted and stored locally — AI requests go directly from your browser to OpenRouter.', 'tracewp' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Connect an OpenRouter API key to enable the AI investigator. The AI can read your site files (read-only) and help diagnose issues. Your key is encrypted and stored locally \u2014 AI requests are proxied through your site so your key never reaches the browser.', 'tracewp' ); ?></p>
 
-		<?php wp_nonce_field( 'tracewp_settings_nonce', 'tracewp_settings_nonce' ); ?>
-
-		<label>
-			<span><?php esc_html_e( 'OpenRouter API Key', 'tracewp' ); ?></span>
+		<span><?php esc_html_e( 'OpenRouter API Key', 'tracewp' ); ?></span>
 			<div class="pt-key-row">
 				<input type="password" id="pt-api-key-input" class="regular-text code"
 					value="<?php echo esc_attr( $has_key ? $masked_key : '' ); ?>"
