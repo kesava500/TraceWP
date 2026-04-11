@@ -92,7 +92,7 @@ The context export includes everything an AI needs to help without asking follow
 
 - **Read-only** — never writes to files or the database
 - **API keys encrypted** with AES-256-CBC (OpenSSL required — no insecure fallback)
-- **Keys fetched via AJAX** — never appear in HTML source
+- **AI requests proxied server-side** — your API key never reaches the browser
 - **File access jailed** via `realpath()` — no path traversal
 - **wp-config credentials** automatically redacted
 - **Sensitive options blocked** (passwords, secrets, tokens, keys, salts)
@@ -131,6 +131,7 @@ tracewp/
 │       └── investigate.js             Reusable AI chat factory
 ├── includes/
 │   ├── class-pt-admin.php             Admin pages and asset enqueuing
+│   ├── class-pt-chat-proxy.php        Server-side OpenRouter proxy (key stays on server)
 │   ├── class-pt-ai-controller.php     REST endpoints for AI tools
 │   ├── class-pt-ai-tools.php          7 read-only tool implementations
 │   ├── class-pt-crypto.php            AES-256-CBC key encryption
@@ -154,6 +155,14 @@ tracewp/
 ```
 
 ## Changelog
+
+### 1.2.0
+
+- **Security: AI requests now proxied server-side** — your OpenRouter API key never reaches the browser
+- Added server-side streaming proxy for AI chat (new `/pt/v1/chat` endpoint)
+- Removed `pt_get_api_key` AJAX endpoint (key no longer exposed to browser)
+- Added image upload size validation (5MB max)
+- Stricter rate limiting for AI chat (20 req/min)
 
 ### 1.1.1
 

@@ -22,7 +22,7 @@ This plugin handles file system access and API keys. If you're modifying:
 
 - **File read tools** — all paths must go through `resolve_path()` which jails to ABSPATH
 - **Option reading** — check against `BLOCKED_OPTION_PATTERNS`
-- **API key handling** — the key must never appear in HTML source. It's fetched via AJAX only
+- **API key handling** — the key never reaches the browser. AI calls are proxied through `/pt/v1/chat` which adds the key server-side
 
 ## Translations
 

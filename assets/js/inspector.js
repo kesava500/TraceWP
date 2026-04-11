@@ -98,8 +98,6 @@
 				freeOnly: ptInspector.aiFreeOnly,
 				restUrl: ptInspector.aiRestUrl,
 				nonce: ptInspector.nonce,
-				ajaxUrl: ptInspector.ajaxUrl,
-				settingsNonce: ptInspector.settingsNonce,
 				compact: true,
 			});
 		}

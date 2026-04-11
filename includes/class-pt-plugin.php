@@ -112,6 +112,7 @@ class PT_Plugin {
 			'includes/class-pt-rest-controller.php',
 			'includes/class-pt-ai-tools.php',
 			'includes/class-pt-ai-controller.php',
+			'includes/class-pt-chat-proxy.php',
 			'includes/class-pt-admin.php',
 			'includes/class-pt-inspector.php',
 		);
@@ -139,6 +140,7 @@ class PT_Plugin {
 		PT_Settings::instance()->register();
 		PT_REST_Controller::instance()->register();
 		PT_AI_Controller::instance()->register();
+		PT_Chat_Proxy::instance()->register();
 		PT_Admin::instance()->register();
 		PT_Inspector::instance()->register();
 	}

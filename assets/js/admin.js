@@ -249,8 +249,6 @@
 			freeOnly: ptAdmin.aiFreeOnly,
 			restUrl: ptAdmin.restUrl,
 			nonce: ptAdmin.nonce,
-			ajaxUrl: ptAdmin.ajaxUrl,
-			settingsNonce: ptAdmin.settingsNonce,
 			compact: false,
 		});
 	}

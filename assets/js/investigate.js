@@ -5,7 +5,6 @@
  *   window.TracewpChat.create(containerEl, config)
  *
  * Config:
- *   apiKey        (string)  OpenRouter API key
  *   model         (string)  Model ID or '' for auto
  *   freeOnly      (bool)    Use free tier routing
  *   restUrl       (string)  WP REST base URL for tool endpoints
@@ -47,7 +46,7 @@
 			'- Give ONE clear recommended fix. Do not present multiple options.\n' +
 			'- Never guess admin UI navigation paths. Verify them by reading the registration code (see patterns below).\n\n' +
 
-			'INVESTIGATION PATTERNS — follow these depending on the issue type:\n\n' +
+			'INVESTIGATION PATTERNS \u2014 follow these depending on the issue type:\n\n' +
 
 			'Theme appearance issue:\n' +
 			'1. Use get_option to read "theme_mods_{theme_slug}" to see all current Customizer settings and values\n' +
@@ -66,7 +65,7 @@
 			'1. Fetch the page HTML to see the actual rendered markup and classes\n' +
 			'2. Read the theme\'s stylesheet to find the relevant CSS rules and variables\n' +
 			'3. Check theme_mods to see if the value is controlled by a Customizer setting\n' +
-			'4. If it IS a Customizer setting, follow the theme appearance pattern above — never suggest CSS overrides for things the Customizer controls\n' +
+			'4. If it IS a Customizer setting, follow the theme appearance pattern above \u2014 never suggest CSS overrides for things the Customizer controls\n' +
 			'5. If CSS override is genuinely needed, provide the exact selector from the actual rendered HTML\n\n' +
 
 			'Widget/menu/sidebar issue:\n' +
@@ -116,7 +115,6 @@
 			pendingImages: [],
 			tokenEstimate: 0,
 			hasConsented: false,
-			apiKey: null,
 		};
 
 		// Check prior consent.
@@ -290,6 +288,9 @@
 
 		// ── Images ──────────────────────────────────
 
+		// Max image size: 5MB.
+		var MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
 		function addImageThumb(base64, type) {
 			state.pendingImages.push({ data: base64, type: type });
 			var thumb = document.createElement('div');
@@ -308,6 +309,10 @@
 		els.fileInput.addEventListener('change', function () {
 			Array.from(this.files || []).forEach(function (f) {
 				if (!f.type.startsWith('image/')) return;
+				if (f.size > MAX_IMAGE_BYTES) {
+					addMessage('assistant', 'Image "' + f.name + '" is too large (' + fmtBytes(f.size) + '). Max size is 5MB.');
+					return;
+				}
 				var r = new FileReader();
 				r.onload = function (e) { addImageThumb(e.target.result, f.type); };
 				r.readAsDataURL(f);
@@ -320,6 +325,10 @@
 				if (!item.type.startsWith('image/')) return;
 				var f = item.getAsFile();
 				if (!f) return;
+				if (f.size > MAX_IMAGE_BYTES) {
+					addMessage('assistant', 'Pasted image is too large (' + fmtBytes(f.size) + '). Max size is 5MB.');
+					return;
+				}
 				var r = new FileReader();
 				r.onload = function (ev) { addImageThumb(ev.target.result, f.type); };
 				r.readAsDataURL(f);
@@ -361,7 +370,7 @@
 					'<div class="pt-consent-dialog">' +
 					'<h3>AI Investigator</h3>' +
 					'<p>The AI will read files from your site and send their contents to the selected AI model via OpenRouter. No files will be modified.</p>' +
-					'<p>Your API key goes directly from your browser to OpenRouter.</p>' +
+					'<p>Requests are proxied through your site \u2014 your API key never reaches the browser.</p>' +
 					'<div class="pt-consent-actions">' +
 					'<button type="button" class="pt-consent-accept">I understand</button>' +
 					'<button type="button" class="pt-consent-cancel">Cancel</button>' +
@@ -378,28 +387,11 @@
 			});
 		}
 
-		// ── API Key (fetched on-demand, never in HTML source) ──
-
-		async function ensureApiKey() {
-			if (state.apiKey) return true;
-
-			try {
-				var form = new FormData();
-				form.append('action', 'pt_get_api_key');
-				form.append('nonce', config.settingsNonce);
-				var res = await fetch(config.ajaxUrl, { method: 'POST', body: form });
-				var data = await res.json();
-				if (data.success && data.data.key) {
-					state.apiKey = data.data.key;
-					return true;
-				}
-			} catch (e) {}
-
-			addMessage('assistant', 'Could not retrieve API key. Check your settings.');
-			return false;
-		}
-
-		// ── Streaming ───────────────────────────────
+		// ── Streaming (via server-side proxy) ───────
+		//
+		// All AI requests go through the /pt/v1/chat REST endpoint.
+		// The server adds the OpenRouter API key and forwards the request.
+		// The key never reaches the browser.
 
 		async function send() {
 			var text = els.input.value.trim();
@@ -408,9 +400,6 @@
 
 			var ok = await checkConsent();
 			if (!ok) return;
-
-			var hasKey = await ensureApiKey();
-			if (!hasKey) return;
 
 			state.streaming = true;
 			els.sendBtn.disabled = true;
@@ -454,13 +443,12 @@
 				};
 
 				try {
-					var response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+					// Route through the server-side proxy — API key never reaches the browser.
+					var response = await fetch(config.restUrl + 'chat', {
 						method: 'POST',
 						headers: {
-							'Authorization': 'Bearer ' + state.apiKey,
 							'Content-Type': 'application/json',
-							'HTTP-Referer': window.location.origin,
-							'X-Title': 'TraceWP',
+							'X-WP-Nonce': config.nonce,
 						},
 						body: JSON.stringify(body),
 					});
@@ -468,10 +456,13 @@
 					if (!response.ok) {
 						var err = await response.json().catch(function () { return {}; });
 						if (response.status === 429) { addMessage('assistant', 'Rate limited, retrying\u2026'); await sleep(3000); continue; }
-						var errMsg = err.error ? err.error.message : 'HTTP ' + response.status;
+						var errMsg = err.error ? err.error.message : (err.message || 'HTTP ' + response.status);
 						// Detect common OpenRouter errors and provide helpful guidance.
 						if (errMsg.indexOf('No endpoints') !== -1 || errMsg.indexOf('provider routing') !== -1) {
-							if (state.pendingImages.length || (state.history.length && JSON.stringify(state.history).indexOf('image_url') !== -1)) {
+							var hasImages = state.history.some(function (m) {
+								return m.content && Array.isArray(m.content) && m.content.some(function (c) { return c.type === 'image_url'; });
+							});
+							if (hasImages) {
 								errMsg = 'The selected model doesn\u2019t support images with tool use. Try removing the image, or switch to a vision-capable model (e.g. Claude Sonnet or GPT-4o) in TraceWP Settings.';
 							} else {
 								errMsg = 'The selected model doesn\u2019t support tool use. Try a different model in TraceWP Settings (Claude, GPT-4, or Gemini models work well).';

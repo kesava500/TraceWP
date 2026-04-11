@@ -148,13 +148,11 @@ class PT_Inspector {
 			'hasApiKey'   => $has_key,
 		);
 
-		// Pass AI config for front-end chat.
+		// Pass AI config for front-end chat (no API key or AJAX needed — proxy handles it).
 		if ( $has_key ) {
-			$localized['aiModel']       = $settings['ai_model'];
-			$localized['aiFreeOnly']    = ! empty( $settings['ai_free_only'] );
-			$localized['aiRestUrl']     = esc_url_raw( rest_url( 'pt/v1/' ) );
-			$localized['ajaxUrl']       = admin_url( 'admin-ajax.php' );
-			$localized['settingsNonce'] = wp_create_nonce( 'tracewp_settings_nonce' );
+			$localized['aiModel']    = $settings['ai_model'];
+			$localized['aiFreeOnly'] = ! empty( $settings['ai_free_only'] );
+			$localized['aiRestUrl']  = esc_url_raw( rest_url( 'pt/v1/' ) );
 		}
 
 		wp_localize_script( 'pt-inspector', 'ptInspector', $localized );

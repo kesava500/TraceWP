@@ -51,7 +51,6 @@ class PT_Settings {
 		add_action( 'wp_ajax_pt_save_api_key', array( $this, 'ajax_save_api_key' ) );
 		add_action( 'wp_ajax_pt_validate_api_key', array( $this, 'ajax_validate_api_key' ) );
 		add_action( 'wp_ajax_pt_fetch_models', array( $this, 'ajax_fetch_models' ) );
-		add_action( 'wp_ajax_pt_get_api_key', array( $this, 'ajax_get_api_key' ) );
 	}
 
 	/**
@@ -302,26 +301,5 @@ class PT_Settings {
 		wp_send_json_success( array( 'models' => $models ) );
 	}
 
-	/**
-	 * AJAX: Return the decrypted API key.
-	 *
-	 * This is the ONLY way the key reaches the browser.
-	 * It never appears in HTML source via wp_localize_script.
-	 *
-	 * @return void
-	 */
-	public function ajax_get_api_key() {
-		check_ajax_referer( 'tracewp_settings_nonce', 'nonce' );
 
-		if ( ! PT_Security::current_user_can_manage() ) {
-			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'tracewp' ) ), 403 );
-		}
-
-		$key = $this->get_api_key();
-		if ( empty( $key ) ) {
-			wp_send_json_error( array( 'message' => __( 'No API key configured.', 'tracewp' ) ) );
-		}
-
-		wp_send_json_success( array( 'key' => $key ) );
-	}
 }

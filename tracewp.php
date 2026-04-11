@@ -3,7 +3,7 @@
  * Plugin Name: TraceWP
  * Plugin URI:  https://belletty.com/tracewp
  * Description: Package your WordPress site context for AI. One-click export of theme, plugins, page data, and element context — paste into ChatGPT, Claude, or any LLM. Includes optional built-in AI investigator via OpenRouter.
- * Version:     1.1.1
+ * Version:     1.2.0
  * Author:      Belletty Digital
  * Author URI:  https://belletty.com
  * Text Domain: tracewp
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'PT_VERSION', '1.1.1' );
+define( 'PT_VERSION', '1.2.0' );
 define( 'PT_PLUGIN_FILE', __FILE__ );
 define( 'PT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
