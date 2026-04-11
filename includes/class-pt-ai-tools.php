@@ -41,15 +41,36 @@ class PT_AI_Tools {
 	const SKIP_DIRS = array( 'node_modules', '.git', 'vendor', '.svn', '.hg' );
 
 	/**
-	 * Blocked file extensions (binary/dangerous).
+	 * Allowed file extensions for read_file (text-like only).
+	 */
+	const READABLE_EXTENSIONS = array(
+		'php', 'phtml',
+		'css', 'scss', 'less', 'sass',
+		'js', 'mjs', 'cjs', 'ts', 'tsx', 'jsx',
+		'json', 'xml', 'yaml', 'yml',
+		'html', 'htm', 'svg',
+		'txt', 'md', 'rst',
+		'ini', 'conf', 'cfg', 'env',
+		'htaccess', 'htpasswd',
+		'sh', 'bash', 'zsh', 'fish',
+		'py', 'rb', 'pl', 'lua',
+		'sql',
+		'log',
+		'mo', 'po',
+		'cgi',
+		'lock',
+	);
+
+	/**
+	 * Blocked file extensions (binary/dangerous) — used for search/list filtering.
 	 */
 	const BLOCKED_EXTENSIONS = array(
 		'zip', 'tar', 'gz', 'rar', '7z',
-		'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico', 'bmp',
+		'png', 'jpg', 'jpeg', 'gif', 'webp', 'ico', 'bmp',
 		'mp3', 'mp4', 'avi', 'mov', 'wmv', 'flv',
 		'woff', 'woff2', 'ttf', 'eot', 'otf',
 		'exe', 'dll', 'so', 'phar',
-		'sql', 'sqlite',
+		'sqlite',
 	);
 
 	/**
@@ -61,6 +82,50 @@ class PT_AI_Tools {
 		'session_tokens', 'user_pass',
 		'openrouter', 'tracewp_openrouter',
 		'mailchimp_api', 'stripe_secret', 'paypal_secret',
+		'private_key', 'api_secret', 'client_secret',
+		'encryption_key', 'signing_key',
+	);
+
+	/**
+	 * Sensitive paths that must never be readable, even under ABSPATH.
+	 *
+	 * These are checked by basename for speed.
+	 */
+	const BLOCKED_FILES = array(
+		'.htpasswd',
+		'.htpasswd.bak',
+		'nginx.conf',
+		'wp-config.php.bak',
+		'wp-config.php~',
+		'wp-config.php.save',
+		'wp-config.php.swp',
+		'wp-config.php.orig',
+		'wp-config.php.old',
+		'config.php.bak',
+		'config.php~',
+	);
+
+	/**
+	 * Maximum length for string arguments.
+	 */
+	const MAX_ARG_LENGTH = 500;
+
+	/**
+	 * Maximum length for search patterns.
+	 */
+	const MAX_PATTERN_LENGTH = 200;
+
+	/**
+	 * Private/loopback IP ranges for SSRF protection.
+	 */
+	const PRIVATE_IP_RANGES = array(
+		'10.', '172.16.', '172.17.', '172.18.', '172.19.',
+		'172.20.', '172.21.', '172.22.', '172.23.', '172.24.',
+		'172.25.', '172.26.', '172.27.', '172.28.', '172.29.',
+		'172.30.', '172.31.',
+		'192.168.',
+		'127.', '0.',
+		'169.254.',
 	);
 
 	/**
@@ -70,21 +135,31 @@ class PT_AI_Tools {
 	 * @return array Result with 'content' or 'error'.
 	 */
 	public static function read_file( $path ) {
+		if ( empty( $path ) || strlen( $path ) > self::MAX_ARG_LENGTH ) {
+			return array( 'error' => 'Invalid path.' );
+		}
+
 		$resolved = self::resolve_path( $path );
 
 		if ( is_wp_error( $resolved ) ) {
 			return array( 'error' => $resolved->get_error_message() );
 		}
 
+		// Check extension allowlist.
+		$ext = strtolower( pathinfo( $resolved, PATHINFO_EXTENSION ) );
+		// Special case: dotfiles like .htaccess have no extension.
+		$basename = basename( $resolved );
+		if ( 0 === strpos( $basename, '.' ) && in_array( substr( $basename, 1 ), self::READABLE_EXTENSIONS, true ) ) {
+			// Allow .htaccess, .env (already blocked in resolve_path), etc.
+			$ext = substr( $basename, 1 );
+		}
+		if ( ! in_array( $ext, self::READABLE_EXTENSIONS, true ) ) {
+			return array( 'error' => 'File type (.' . ( $ext ?: 'no extension' ) . ') is not readable. Only text-based file types are allowed.' );
+		}
+
 		// Check if wp-config.php — serve redacted version.
 		if ( 'wp-config.php' === basename( $resolved ) ) {
 			return self::read_wp_config_redacted( $resolved );
-		}
-
-		// Check extension.
-		$ext = strtolower( pathinfo( $resolved, PATHINFO_EXTENSION ) );
-		if ( in_array( $ext, self::BLOCKED_EXTENSIONS, true ) ) {
-			return array( 'error' => 'Binary file type (' . $ext . '), cannot display contents.' );
 		}
 
 		// Check size.
@@ -101,11 +176,6 @@ class PT_AI_Tools {
 		$content = file_get_contents( $resolved, false, null, 0, self::MAX_FILE_SIZE ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		if ( false === $content ) {
 			return array( 'error' => 'Could not read file.' );
-		}
-
-		// Check if content is binary.
-		if ( self::is_binary( $content ) ) {
-			return array( 'error' => 'File appears to be binary, cannot display contents.' );
 		}
 
 		$result = array(
@@ -130,6 +200,10 @@ class PT_AI_Tools {
 	 * @return array Result with 'entries' or 'error'.
 	 */
 	public static function list_directory( $path, $depth = 1 ) {
+		if ( empty( $path ) || strlen( $path ) > self::MAX_ARG_LENGTH ) {
+			return array( 'error' => 'Invalid path.' );
+		}
+
 		$resolved = self::resolve_path( $path );
 
 		if ( is_wp_error( $resolved ) ) {
@@ -160,6 +234,16 @@ class PT_AI_Tools {
 	 * @return array Result with 'matches' or 'error'.
 	 */
 	public static function search_files( $directory, $pattern, $type = 'name' ) {
+		if ( empty( $directory ) || strlen( $directory ) > self::MAX_ARG_LENGTH ) {
+			return array( 'error' => 'Invalid directory.' );
+		}
+		if ( empty( $pattern ) || strlen( $pattern ) > self::MAX_PATTERN_LENGTH ) {
+			return array( 'error' => 'Invalid search pattern.' );
+		}
+		if ( ! in_array( $type, array( 'name', 'content' ), true ) ) {
+			return array( 'error' => 'Invalid search type.' );
+		}
+
 		$resolved = self::resolve_path( $directory );
 
 		if ( is_wp_error( $resolved ) ) {
@@ -257,7 +341,7 @@ class PT_AI_Tools {
 	public static function get_option( $option_name ) {
 		$option_name = sanitize_key( $option_name );
 
-		if ( empty( $option_name ) ) {
+		if ( empty( $option_name ) || strlen( $option_name ) > self::MAX_ARG_LENGTH ) {
 			return array( 'error' => 'Option name is required.' );
 		}
 
@@ -295,10 +379,20 @@ class PT_AI_Tools {
 	 * @return array Result with 'html' or 'error'.
 	 */
 	public static function fetch_page_html( $url ) {
+		if ( empty( $url ) || strlen( $url ) > 2048 ) {
+			return array( 'error' => 'URL is required.' );
+		}
+
 		$url = esc_url_raw( $url );
 
 		if ( empty( $url ) ) {
-			return array( 'error' => 'URL is required.' );
+			return array( 'error' => 'Invalid URL.' );
+		}
+
+		// Must be http or https.
+		$scheme = wp_parse_url( $url, PHP_URL_SCHEME );
+		if ( ! in_array( $scheme, array( 'http', 'https' ), true ) ) {
+			return array( 'error' => 'Only http(s) URLs are allowed.' );
 		}
 
 		// Verify same domain.
@@ -307,6 +401,16 @@ class PT_AI_Tools {
 
 		if ( ! $url_host || strtolower( $url_host ) !== strtolower( $site_host ) ) {
 			return array( 'error' => 'URL must be on the same domain as this site.' );
+		}
+
+		// SSRF protection: resolve the hostname and check for private IPs.
+		$resolved_ip = gethostbyname( $url_host );
+		if ( $resolved_ip === $url_host ) {
+			// DNS resolution failed — could not verify IP.
+			return array( 'error' => 'Could not resolve host.' );
+		}
+		if ( self::is_private_ip( $resolved_ip ) ) {
+			return array( 'error' => 'Cannot fetch internal/private URLs.' );
 		}
 
 		$response = wp_remote_get( $url, array(
@@ -347,6 +451,10 @@ class PT_AI_Tools {
 	 * @return array Result with 'templates' or 'error'.
 	 */
 	public static function get_template_hierarchy( $url ) {
+		if ( empty( $url ) || strlen( $url ) > 2048 ) {
+			return array( 'error' => 'Invalid URL.' );
+		}
+
 		$url = esc_url_raw( $url );
 
 		// Resolve URL to a post.
@@ -493,6 +601,11 @@ class PT_AI_Tools {
 			return new WP_Error( 'blocked', 'Access to .env files is blocked.' );
 		}
 
+		// Block sensitive backup/config files.
+		if ( in_array( $basename, self::BLOCKED_FILES, true ) ) {
+			return new WP_Error( 'blocked', 'Access to this file is blocked for security.' );
+		}
+
 		// Block log files over 50KB.
 		if ( 'log' === strtolower( pathinfo( $absolute, PATHINFO_EXTENSION ) ) && filesize( $absolute ) > 51200 ) {
 			return new WP_Error( 'too_large', 'Log file too large. Only log files under 50KB can be read.' );
@@ -517,14 +630,24 @@ class PT_AI_Tools {
 	}
 
 	/**
-	 * Check if content appears to be binary.
+	 * Check if an IP address is private/internal.
 	 *
-	 * @param string $content File content.
+	 * @param string $ip IP address.
 	 * @return bool
 	 */
-	private static function is_binary( $content ) {
-		$sample = substr( $content, 0, 8192 );
-		return false !== strpos( $sample, "\x00" );
+	private static function is_private_ip( $ip ) {
+		// Validate it's actually an IP.
+		$ip = trim( $ip );
+		if ( ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+			return true; // Treat invalid as private.
+		}
+
+		// Check loopback.
+		if ( filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

@@ -101,6 +101,16 @@ class PT_Chat_Proxy {
 	}
 
 	/**
+	 * Maximum number of messages per request.
+	 */
+	const MAX_MESSAGES = 50;
+
+	/**
+	 * Maximum total content length per request (characters).
+	 */
+	const MAX_CONTENT_LENGTH = 500000;
+
+	/**
 	 * Handle chat proxy request.
 	 *
 	 * Validates input, builds the OpenRouter request, and streams
@@ -279,6 +289,12 @@ class PT_Chat_Proxy {
 			return $clean;
 		}
 
+		if ( count( $messages ) > self::MAX_MESSAGES ) {
+			return $clean;
+		}
+
+		$total_length = 0;
+
 		foreach ( $messages as $msg ) {
 			if ( ! is_array( $msg ) || empty( $msg['role'] ) ) {
 				continue;
@@ -314,6 +330,17 @@ class PT_Chat_Proxy {
 			}
 
 			$clean[] = $item;
+
+			// Track total content length to prevent oversized payloads.
+			$content_len = is_string( $item['content'] ) ? strlen( $item['content'] ) : 0;
+			if ( is_array( $item['content'] ) ) {
+				$content_len = strlen( wp_json_encode( $item['content'] ) );
+			}
+			$total_length += $content_len;
+			if ( $total_length > self::MAX_CONTENT_LENGTH ) {
+				// Too large — truncate the list here.
+				break;
+			}
 		}
 
 		return $clean;

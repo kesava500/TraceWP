@@ -94,6 +94,11 @@ The context export includes everything an AI needs to help without asking follow
 - **API keys encrypted** with AES-256-CBC (OpenSSL required — no insecure fallback)
 - **AI requests proxied server-side** — your API key never reaches the browser
 - **File access jailed** via `realpath()` — no path traversal
+- **Extension allowlist** for `read_file` — only text-based file types readable
+- **Sensitive files blocked** — `.env`, `.htpasswd`, wp-config backups, etc.
+- **SSRF protection** — `fetch_page_html` blocks private/internal IPs
+- **Argument validation** — length limits on all tool inputs (paths, URLs, patterns, option names)
+- **Request size limits** — max 50 messages and 500KB content per chat request
 - **wp-config credentials** automatically redacted
 - **Sensitive options blocked** (passwords, secrets, tokens, keys, salts)
 - **`.env` files blocked** entirely
@@ -159,10 +164,16 @@ tracewp/
 ### 1.2.0
 
 - **Security: AI requests now proxied server-side** — your OpenRouter API key never reaches the browser
+- **Security: Server-side argument validation for all tool endpoints** — path lengths, extension allowlists, blocked sensitive files, SSRF protection, content size limits
 - Added server-side streaming proxy for AI chat (new `/pt/v1/chat` endpoint)
 - Removed `pt_get_api_key` AJAX endpoint (key no longer exposed to browser)
 - Added image upload size validation (5MB max)
 - Stricter rate limiting for AI chat (20 req/min)
+- File `read_file` now uses an extension allowlist (text types only) instead of a blocklist
+- Added SSRF protection to `fetch_page_html` (private IP detection)
+- Added blocked file list (`.htpasswd`, wp-config backups, etc.)
+- Added max messages (50) and max content length (500KB) to chat proxy
+- Added search pattern length limit (200 chars) to prevent slow searches
 
 ### 1.1.1
 

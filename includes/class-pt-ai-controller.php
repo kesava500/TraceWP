@@ -62,6 +62,7 @@ class PT_AI_Controller {
 					'type'              => 'string',
 					'required'          => true,
 					'sanitize_callback' => 'sanitize_text_field',
+					'validate_callback' => function( $v ) { return strlen( $v ) <= 500; },
 				),
 			),
 		) ) );
@@ -73,6 +74,7 @@ class PT_AI_Controller {
 					'type'              => 'string',
 					'required'          => true,
 					'sanitize_callback' => 'sanitize_text_field',
+					'validate_callback' => function( $v ) { return strlen( $v ) <= 500; },
 				),
 				'depth' => array(
 					'type'    => 'integer',
@@ -88,11 +90,13 @@ class PT_AI_Controller {
 					'type'              => 'string',
 					'required'          => true,
 					'sanitize_callback' => 'sanitize_text_field',
+					'validate_callback' => function( $v ) { return strlen( $v ) <= 500; },
 				),
 				'pattern'   => array(
 					'type'              => 'string',
 					'required'          => true,
 					'sanitize_callback' => 'sanitize_text_field',
+					'validate_callback' => function( $v ) { return strlen( $v ) <= 200; },
 				),
 				'type'      => array(
 					'type'    => 'string',
@@ -109,6 +113,7 @@ class PT_AI_Controller {
 					'type'              => 'string',
 					'required'          => true,
 					'sanitize_callback' => 'sanitize_key',
+					'validate_callback' => function( $v ) { return strlen( $v ) <= 200; },
 				),
 			),
 		) ) );
@@ -120,6 +125,7 @@ class PT_AI_Controller {
 					'type'              => 'string',
 					'required'          => true,
 					'sanitize_callback' => 'esc_url_raw',
+					'validate_callback' => function( $v ) { return strlen( $v ) <= 2048; },
 				),
 			),
 		) ) );
@@ -131,6 +137,7 @@ class PT_AI_Controller {
 					'type'              => 'string',
 					'required'          => true,
 					'sanitize_callback' => 'esc_url_raw',
+					'validate_callback' => function( $v ) { return strlen( $v ) <= 2048; },
 				),
 			),
 		) ) );
