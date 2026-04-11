@@ -111,6 +111,11 @@ class PT_Chat_Proxy {
 	const MAX_CONTENT_LENGTH = 500000;
 
 	/**
+	 * Maximum raw request body size (1MB).
+	 */
+	const MAX_REQUEST_SIZE = 1048576;
+
+	/**
 	 * Handle chat proxy request.
 	 *
 	 * Validates input, builds the OpenRouter request, and streams
@@ -119,6 +124,12 @@ class PT_Chat_Proxy {
 	 * @param WP_REST_Request $request Request.
 	 */
 	public function handle_chat( WP_REST_Request $request ) {
+		// Reject oversized payloads before any processing.
+		$size_check = PT_Security::check_request_size( $request, self::MAX_REQUEST_SIZE );
+		if ( is_wp_error( $size_check ) ) {
+			return $size_check;
+		}
+
 		$api_key = PT_Settings::instance()->get_api_key();
 		if ( empty( $api_key ) ) {
 			return new WP_Error(

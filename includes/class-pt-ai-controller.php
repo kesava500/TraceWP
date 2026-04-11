@@ -155,14 +155,24 @@ class PT_AI_Controller {
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function tool_permission() {
+	public function tool_permission( WP_REST_Request $request ) {
 		$auth = PT_Security::rest_permission();
 		if ( is_wp_error( $auth ) ) {
 			return $auth;
 		}
 
+		$size_check = PT_Security::check_request_size( $request, self::MAX_REQUEST_SIZE );
+		if ( is_wp_error( $size_check ) ) {
+			return $size_check;
+		}
+
 		return PT_Security::rate_limit( 60, 60, 'tools' );
 	}
+
+	/**
+	 * Maximum request body size for tool endpoints (256KB).
+	 */
+	const MAX_REQUEST_SIZE = 262144;
 
 	/**
 	 * Handle read_file tool call.
@@ -171,6 +181,7 @@ class PT_AI_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function handle_read_file( WP_REST_Request $request ) {
+
 		return rest_ensure_response(
 			PT_AI_Tools::read_file( $request->get_param( 'path' ) )
 		);

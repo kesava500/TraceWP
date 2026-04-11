@@ -175,6 +175,7 @@ tracewp/
 - Added blocked file list (`.htpasswd`, wp-config backups, etc.)
 - Added max messages (50) and max content length (500KB) to chat proxy
 - Added search pattern length limit (200 chars) to prevent slow searches
+- Request size limits on all endpoints: 1MB for chat, 256KB for tools, 10KB for settings
 - Moved all settings AJAX handlers to REST endpoints (proper WP REST nonces, no exposed settings nonce in page HTML)
 - Removed `ajax_get_api_key`, `ajax_save_api_key`, `ajax_validate_api_key`, and `ajax_fetch_models` AJAX handlers
 - Removed `ajaxUrl` and `settingsNonce` from all localized JS data

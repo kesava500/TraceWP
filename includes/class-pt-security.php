@@ -79,6 +79,28 @@ class PT_Security {
 	}
 
 	/**
+	 * Check Content-Length header against a size limit.
+	 *
+	 * Call this early in endpoint handlers to reject oversized payloads
+	 * before the body is parsed.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @param int            $max_bytes Maximum body size in bytes.
+	 * @return bool|WP_Error True if OK, WP_Error if too large.
+	 */
+	public static function check_request_size( WP_REST_Request $request, $max_bytes = 1048576 ) {
+		$length = $request->get_header( 'content-length' );
+		if ( $length && (int) $length > $max_bytes ) {
+			return new WP_Error(
+				'pt_payload_too_large',
+				sprintf( __( 'Request body too large. Maximum size is %dKB.', 'tracewp' ), $max_bytes / 1024 ),
+				array( 'status' => 413 )
+			);
+		}
+		return true;
+	}
+
+	/**
 	 * Simple transient-based rate limiter.
 	 *
 	 * @param int $limit  Max requests per window.

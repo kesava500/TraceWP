@@ -88,6 +88,11 @@ class PT_Settings_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function save_api_key( WP_REST_Request $request ) {
+		$size_check = PT_Security::check_request_size( $request, 10240 ); // 10KB max for settings.
+		if ( is_wp_error( $size_check ) ) {
+			return $size_check;
+		}
+
 		$key = $request->get_param( 'api_key' );
 
 		if ( empty( $key ) ) {
