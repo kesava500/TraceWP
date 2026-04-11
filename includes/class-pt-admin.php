@@ -39,6 +39,7 @@ class PT_Admin {
 	public function register() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'admin_init', array( 'PT_Security', 'send_csp_headers' ) );
 	}
 
 	/**

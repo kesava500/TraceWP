@@ -130,4 +130,39 @@ class PT_Security {
 
 		return true;
 	}
+
+	/**
+	 * Send Content-Security-Policy headers for TraceWP admin pages.
+	 *
+	 * Restricts script sources to the site's own domain and the WordPress
+	 * admin area, preventing injection of external scripts. AI-generated
+	 * HTML output is already escaped, but CSP provides defense-in-depth.
+	 *
+	 * @return void
+	 */
+	public static function send_csp_headers() {
+		if ( headers_sent() ) {
+			return;
+		}
+
+		// Only set CSP on TraceWP admin pages.
+		$screen = get_current_screen();
+		if ( ! $screen || false === strpos( $screen->id, 'pt' ) ) {
+			return;
+		}
+
+		$domain = wp_parse_url( site_url(), PHP_URL_HOST );
+		if ( $domain ) {
+			$csp = "default-src 'self'; " .
+				"script-src 'self' 'unsafe-inline' 'unsafe-eval'; " . // WP admin needs inline/eval.
+				"style-src 'self' 'unsafe-inline'; " .
+				"img-src 'self' data: blob:; " . // Data URIs for screenshots.
+				"connect-src 'self'; " . // REST calls go to same origin (proxied).
+				"frame-ancestors 'none'; " . // Prevent framing/clickjacking.
+				"form-action 'self'; " .
+				"base-uri 'self';";
+
+			header( 'Content-Security-Policy: ' . $csp );
+		}
+	}
 }
