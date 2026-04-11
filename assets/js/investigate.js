@@ -111,6 +111,7 @@
 			history: [],
 			systemMessage: '',
 			toolCache: {},
+		toolCacheTimes: {},
 			streaming: false,
 			pendingImages: [],
 			tokenEstimate: 0,
@@ -342,7 +343,11 @@
 			if (!ep) return JSON.stringify({ error: 'Unknown tool' });
 
 			var key = name + ':' + JSON.stringify(args);
-			if (state.toolCache[key]) return state.toolCache[key];
+			var now = Date.now();
+			// Cache TTL: 5 minutes (300000ms). Site state can change during a session.
+			if (state.toolCache[key] && state.toolCacheTimes[key] && (now - state.toolCacheTimes[key] < 300000)) {
+				return state.toolCache[key];
+			}
 
 			try {
 				var res = await fetch(config.restUrl + ep, {
@@ -352,6 +357,7 @@
 				});
 				var result = JSON.stringify(await res.json(), null, 2);
 				state.toolCache[key] = result;
+				state.toolCacheTimes[key] = now;
 				return result;
 			} catch (e) {
 				return JSON.stringify({ error: 'Tool call failed: ' + e.message });
@@ -571,6 +577,7 @@
 			newBtn.addEventListener('click', function () {
 				state.history = [];
 				state.toolCache = {};
+				state.toolCacheTimes = {};
 				state.tokenEstimate = 0;
 				state.pendingImages = [];
 				els.messages.innerHTML = config.compact ? '' :
@@ -627,6 +634,7 @@
 				initContext(payload);
 				state.history = [];
 				state.toolCache = {};
+				state.toolCacheTimes = {};
 				state.tokenEstimate = 0;
 				els.messages.innerHTML = '';
 				if (els.tokens) els.tokens.textContent = '';
