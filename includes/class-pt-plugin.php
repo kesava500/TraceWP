@@ -103,6 +103,7 @@ class PT_Plugin {
 			'includes/class-pt-crypto.php',
 			'includes/class-pt-security.php',
 			'includes/class-pt-settings.php',
+			'includes/class-pt-settings-controller.php',
 			'includes/class-pt-detector.php',
 			'includes/class-pt-site-collector.php',
 			'includes/class-pt-environment-collector.php',
@@ -138,6 +139,7 @@ class PT_Plugin {
 	 */
 	public function init() {
 		PT_Settings::instance()->register();
+		PT_Settings_Controller::instance()->register();
 		PT_REST_Controller::instance()->register();
 		PT_AI_Controller::instance()->register();
 		PT_Chat_Proxy::instance()->register();

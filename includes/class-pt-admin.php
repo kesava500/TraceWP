@@ -95,9 +95,7 @@ class PT_Admin {
 			'ptAdmin',
 			array(
 				'restUrl'        => esc_url_raw( rest_url( 'pt/v1/' ) ),
-				'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
 				'nonce'          => wp_create_nonce( 'wp_rest' ),
-				'settingsNonce'  => wp_create_nonce( 'tracewp_settings_nonce' ),
 				'inspectUrl'     => PT_Inspector::get_inspect_url( home_url( '/' ) ),
 				'currentPageUrl' => isset( $_GET['url'] ) ? esc_url_raw( wp_unslash( $_GET['url'] ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				'hasApiKey'      => PT_Settings::instance()->has_api_key(),

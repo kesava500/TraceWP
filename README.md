@@ -138,7 +138,8 @@ tracewp/
 │   ├── class-pt-admin.php             Admin pages and asset enqueuing
 │   ├── class-pt-chat-proxy.php        Server-side OpenRouter proxy (key stays on server)
 │   ├── class-pt-ai-controller.php     REST endpoints for AI tools
-│   ├── class-pt-ai-tools.php          7 read-only tool implementations
+│   ├── class-pt-ai-tools.php          7 read-only tool implementations + input validation
+│   ├── class-pt-settings-controller.php  REST endpoints for settings (key save/validate/models)
 │   ├── class-pt-crypto.php            AES-256-CBC key encryption
 │   ├── class-pt-detector.php          Theme/plugin type detection
 │   ├── class-pt-environment-collector.php  Server, config, cron, debug log
@@ -149,7 +150,7 @@ tracewp/
 │   ├── class-pt-plugin.php            Plugin bootstrap
 │   ├── class-pt-rest-controller.php   REST endpoints for export
 │   ├── class-pt-security.php          Capability checks, rate limiting
-│   ├── class-pt-settings.php          Settings + API key AJAX handlers
+│   ├── class-pt-settings.php          Settings registration + API key management
 │   ├── class-pt-site-collector.php    Site data + extended collectors
 │   └── class-pt-support.php           Sanitization, redaction, utilities
 └── templates/
@@ -168,12 +169,15 @@ tracewp/
 - Added server-side streaming proxy for AI chat (new `/pt/v1/chat` endpoint)
 - Removed `pt_get_api_key` AJAX endpoint (key no longer exposed to browser)
 - Added image upload size validation (5MB max)
-- Stricter rate limiting for AI chat (20 req/min)
+- **CSRF protection**: All settings actions (key save/validate, model fetch) moved to REST endpoints with `wp_rest` nonce — no more exposed `tracewp_settings_nonce` in page HTML
 - File `read_file` now uses an extension allowlist (text types only) instead of a blocklist
 - Added SSRF protection to `fetch_page_html` (private IP detection)
 - Added blocked file list (`.htpasswd`, wp-config backups, etc.)
 - Added max messages (50) and max content length (500KB) to chat proxy
 - Added search pattern length limit (200 chars) to prevent slow searches
+- Moved all settings AJAX handlers to REST endpoints (proper WP REST nonces, no exposed settings nonce in page HTML)
+- Removed `ajax_get_api_key`, `ajax_save_api_key`, `ajax_validate_api_key`, and `ajax_fetch_models` AJAX handlers
+- Removed `ajaxUrl` and `settingsNonce` from all localized JS data
 
 ### 1.1.1
 

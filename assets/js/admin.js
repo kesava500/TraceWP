@@ -278,22 +278,21 @@
 			setKeyStatus('Saving...', 'info');
 
 			try {
-				var form = new FormData();
-				form.append('action', 'pt_save_api_key');
-				form.append('nonce', ptAdmin.settingsNonce);
-				form.append('api_key', key);
-
-				var res = await fetch(ptAdmin.ajaxUrl, { method: 'POST', body: form });
+				var res = await fetch(ptAdmin.restUrl + 'settings/api-key', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': ptAdmin.nonce },
+					body: JSON.stringify({ api_key: key }),
+				});
 				var data = await res.json();
 
-				if (data.success) {
+				if (res.ok && data.masked) {
 					setKeyStatus('Key saved successfully.', 'success');
-					if (input && data.data.masked) input.value = data.data.masked;
+					if (input && data.masked) input.value = data.masked;
 					var modelSection = document.getElementById('pt-model-section');
 					if (modelSection) modelSection.style.display = '';
 					loadModels();
 				} else {
-					setKeyStatus(data.data.message || 'Failed to save key.', 'error');
+					setKeyStatus(data.message || 'Failed to save key.', 'error');
 				}
 			} catch (e) {
 				setKeyStatus('Network error: ' + e.message, 'error');
@@ -308,15 +307,14 @@
 			if (!confirm('Remove your OpenRouter API key?')) return;
 
 			try {
-				var form = new FormData();
-				form.append('action', 'pt_save_api_key');
-				form.append('nonce', ptAdmin.settingsNonce);
-				form.append('api_key', '');
-
-				var res = await fetch(ptAdmin.ajaxUrl, { method: 'POST', body: form });
+				var res = await fetch(ptAdmin.restUrl + 'settings/api-key', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': ptAdmin.nonce },
+					body: JSON.stringify({ api_key: '' }),
+				});
 				var data = await res.json();
 
-				if (data.success) {
+				if (res.ok) {
 					setKeyStatus('Key removed.', 'info');
 					var input = document.getElementById('pt-api-key-input');
 					if (input) input.value = '';
@@ -336,21 +334,21 @@
 			setKeyStatus('Testing connection...', 'info');
 
 			try {
-				var form = new FormData();
-				form.append('action', 'pt_validate_api_key');
-				form.append('nonce', ptAdmin.settingsNonce);
-
-				var res = await fetch(ptAdmin.ajaxUrl, { method: 'POST', body: form });
+				var res = await fetch(ptAdmin.restUrl + 'settings/validate-key', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': ptAdmin.nonce },
+				});
 				var data = await res.json();
 
-				if (data.success) {
-					var info = data.data.data || {};
+				if (res.ok) {
+					var info = data.data || {};
+					var msg = data.message || 'Connected';
 					var msg = 'Connected';
 					if (info.label) msg += ' (' + info.label + ')';
-					if (info.limit != null) msg += ' — credits: $' + (info.usage != null ? (info.limit - info.usage).toFixed(2) : info.limit);
+					if (info.limit != null) msg += ' \u2014 credits: $' + (info.usage != null ? (info.limit - info.usage).toFixed(2) : info.limit);
 					setKeyStatus(msg, 'success');
 				} else {
-					setKeyStatus(data.data.message || 'Connection failed.', 'error');
+					setKeyStatus(data.message || 'Connection failed.', 'error');
 				}
 			} catch (e) {
 				setKeyStatus('Network error: ' + e.message, 'error');
@@ -366,19 +364,18 @@
 		select.innerHTML = '<option value="">Loading models...</option>';
 
 		try {
-			var form = new FormData();
-			form.append('action', 'pt_fetch_models');
-			form.append('nonce', ptAdmin.settingsNonce);
-
-			var res = await fetch(ptAdmin.ajaxUrl, { method: 'POST', body: form });
+			var res = await fetch(ptAdmin.restUrl + 'settings/models', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': ptAdmin.nonce },
+			});
 			var data = await res.json();
 
-			if (!data.success || !data.data.models) {
+			if (!res.ok || !data.models) {
 				select.innerHTML = '<option value="">Failed to load models</option>';
 				return;
 			}
 
-			var models = data.data.models;
+			var models = data.models;
 			var currentModel = ptAdmin.aiModel || '';
 
 			// Clear and build with DOM elements (no innerHTML from external data).
