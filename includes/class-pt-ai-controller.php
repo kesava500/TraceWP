@@ -161,7 +161,7 @@ class PT_AI_Controller {
 			return $auth;
 		}
 
-		return PT_Security::rate_limit( 60, 60 );
+		return PT_Security::rate_limit( 60, 60, 'tools' );
 	}
 
 	/**

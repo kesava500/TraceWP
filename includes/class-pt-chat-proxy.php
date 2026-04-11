@@ -97,7 +97,7 @@ class PT_Chat_Proxy {
 		}
 
 		// Stricter rate limit for AI calls: 20 requests per 60 seconds.
-		return PT_Security::rate_limit( 20, 60 );
+		return PT_Security::rate_limit( 20, 60, 'chat' );
 	}
 
 	/**

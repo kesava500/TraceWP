@@ -183,7 +183,7 @@ class PT_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function site_context( WP_REST_Request $request ) {
-		$rate_check = PT_Security::rate_limit();
+		$rate_check = PT_Security::rate_limit( 30, 60, 'export' );
 		if ( is_wp_error( $rate_check ) ) {
 			return $rate_check;
 		}
@@ -198,7 +198,7 @@ class PT_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function page_context( WP_REST_Request $request ) {
-		$rate_check = PT_Security::rate_limit();
+		$rate_check = PT_Security::rate_limit( 30, 60, 'export' );
 		if ( is_wp_error( $rate_check ) ) {
 			return $rate_check;
 		}
@@ -213,7 +213,7 @@ class PT_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function element_context( WP_REST_Request $request ) {
-		$rate_check = PT_Security::rate_limit();
+		$rate_check = PT_Security::rate_limit( 30, 60, 'export' );
 		if ( is_wp_error( $rate_check ) ) {
 			return $rate_check;
 		}

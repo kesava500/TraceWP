@@ -85,9 +85,9 @@ class PT_Security {
 	 * @param int $window Window in seconds.
 	 * @return bool|\WP_Error True if allowed, WP_Error if rate limited.
 	 */
-	public static function rate_limit( $limit = 30, $window = 60 ) {
+	public static function rate_limit( $limit = 30, $window = 60, $scope = '' ) {
 		$user_id = get_current_user_id();
-		$key     = 'pt_rate_' . $user_id;
+		$key     = 'pt_rate_' . $user_id . ( $scope ? '_' . $scope : '' );
 		$data    = get_transient( $key );
 
 		if ( false === $data ) {
