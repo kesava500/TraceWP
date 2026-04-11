@@ -91,7 +91,7 @@ The context export includes everything an AI needs to help without asking follow
 ## Security
 
 - **Read-only** — never writes to files or the database
-- **API keys encrypted** with AES-256-CBC (OpenSSL required — no insecure fallback)
+- **API keys encrypted** with AES-256-CBC + HMAC-SHA256 (encrypt-then-MAC, constant-time verification)
 - **AI requests proxied server-side** — your API key never reaches the browser
 - **File access jailed** via `realpath()` — no path traversal
 - **Extension allowlist** for `read_file` — only text-based file types readable
@@ -179,6 +179,10 @@ tracewp/
 - Moved all settings AJAX handlers to REST endpoints (proper WP REST nonces, no exposed settings nonce in page HTML)
 - Removed `ajax_get_api_key`, `ajax_save_api_key`, `ajax_validate_api_key`, and `ajax_fetch_models` AJAX handlers
 - Removed `ajaxUrl` and `settingsNonce` from all localized JS data
+- Switched API key encryption to encrypt-then-MAC (AES-256-CBC + HMAC-SHA256) with constant-time verification
+- Removed fallback encryption key — AUTH_KEY must be properly set in wp-config.php
+- Legacy keys auto-upgraded to new authenticated format on first decrypt
+- `PT_Crypto::encrypt()` and `decrypt()` now return `WP_Error` on failure instead of empty string
 
 ### 1.1.1
 

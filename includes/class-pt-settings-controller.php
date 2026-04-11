@@ -111,12 +111,8 @@ class PT_Settings_Controller {
 		}
 
 		$encrypted = PT_Crypto::encrypt( $key );
-		if ( empty( $encrypted ) ) {
-			return new WP_Error(
-				'pt_encrypt_failed',
-				__( 'Encryption failed. Check that your wp-config.php AUTH_KEY is set.', 'tracewp' ),
-				array( 'status' => 500 )
-			);
+		if ( is_wp_error( $encrypted ) ) {
+			return $encrypted;
 		}
 
 		update_option( PT_Settings::API_KEY_OPTION, $encrypted );

@@ -107,7 +107,18 @@ class PT_Settings {
 	 */
 	public function get_api_key() {
 		$encrypted = get_option( self::API_KEY_OPTION, '' );
-		return PT_Crypto::decrypt( $encrypted );
+		if ( empty( $encrypted ) ) {
+			return '';
+		}
+
+		$decrypted = PT_Crypto::decrypt( $encrypted );
+		if ( is_wp_error( $decrypted ) ) {
+			// Log the error for admins but don't expose it.
+			error_log( 'TraceWP: API key decryption failed - ' . $decrypted->get_error_message() );
+			return '';
+		}
+
+		return $decrypted;
 	}
 
 	/**
